@@ -8,14 +8,21 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var authViewModel = AuthViewModel()
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        
+        NavigationStack {
+            if authViewModel.currentUser == nil {
+                LoginView()
+            } else if authViewModel.currentUser?.isAdmin == true {
+                AdminHomeView()
+            } else {
+                ResidentHomeView()
+            }
         }
-        .padding()
+        .environmentObject(authViewModel)
+        
+
     }
 }
 
