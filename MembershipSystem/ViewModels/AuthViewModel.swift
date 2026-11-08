@@ -144,22 +144,43 @@ class AuthViewModel: ObservableObject {
         }
     }
     
+    func resized(_ image: UIImage, maxLength: CGFloat) -> UIImage {
+        let longest = max(image.size.width, image.size.height)
+        let scale = min(1, maxLength / longest)     // 已經夠小的就不放大
+        let newSize = CGSize(width: image.size.width * scale,
+                             height: image.size.height * scale)
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1                             // 1 點 = 1 像素，避免被乘上螢幕倍率
+        return UIGraphicsImageRenderer(size: newSize, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
+    }
+    
     func updatePhoto(imageData: Data) async {
         guard let uid = currentUser?.id else { return }
+
+        // 1. 壓縮成 JPEG
+        guard let uiImage = UIImage(data: imageData),
+              let jpegData = resized(uiImage, maxLength: 500)
+                  .jpegData(compressionQuality: 0.7) else { return }
+        print("上傳大小：", jpegData.count / 1024, "KB")
         let db = Firestore.firestore()
-        do  {
-            let storage = Storage.storage()
-            let ref = storage.reference().child("avatars/\(currentUser?.id ?? "").jpg")
-            _ = try await ref.putDataAsync(imageData)
+        do {
+            let ref = Storage.storage().reference().child("avatars/\(uid).jpg")
+
+            // 2. 標示檔案類型
+            let metadata = StorageMetadata()
+            metadata.contentType = "image/jpeg"
+
+            _ = try await ref.putDataAsync(jpegData, metadata: metadata)
             let url = try await ref.downloadURL()
             try await db.collection("users").document(uid).updateData([
                 "avatarURL": url.absoluteString
             ])
         } catch {
             errorMessage = error.localizedDescription
-            
         }
-        
     }
     
     func fetchUser() async {
