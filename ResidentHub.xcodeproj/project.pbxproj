@@ -13,13 +13,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		22753FF12FF10C8200CFABFE /* MembershipSystem.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MembershipSystem.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		22753FF12FF10C8200CFABFE /* ResidentHub.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ResidentHub.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		2275402A2FF164E500CFABFE /* MembershipSystem */ = {
+		2275402A2FF164E500CFABFE /* ResidentHub */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MembershipSystem;
+			path = ResidentHub;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -41,7 +41,7 @@
 		22753FE82FF10C8200CFABFE = {
 			isa = PBXGroup;
 			children = (
-				2275402A2FF164E500CFABFE /* MembershipSystem */,
+				2275402A2FF164E500CFABFE /* ResidentHub */,
 				2275400A2FF1264A00CFABFE /* Frameworks */,
 				22753FF22FF10C8200CFABFE /* Products */,
 			);
@@ -50,7 +50,7 @@
 		22753FF22FF10C8200CFABFE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				22753FF12FF10C8200CFABFE /* MembershipSystem.app */,
+				22753FF12FF10C8200CFABFE /* ResidentHub.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -65,9 +65,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		22753FF02FF10C8200CFABFE /* MembershipSystem */ = {
+		22753FF02FF10C8200CFABFE /* ResidentHub */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 22753FFC2FF10C8200CFABFE /* Build configuration list for PBXNativeTarget "MembershipSystem" */;
+			buildConfigurationList = 22753FFC2FF10C8200CFABFE /* Build configuration list for PBXNativeTarget "ResidentHub" */;
 			buildPhases = (
 				22753FED2FF10C8200CFABFE /* Sources */,
 				22753FEE2FF10C8200CFABFE /* Frameworks */,
@@ -78,16 +78,16 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				2275402A2FF164E500CFABFE /* MembershipSystem */,
+				2275402A2FF164E500CFABFE /* ResidentHub */,
 			);
-			name = MembershipSystem;
+			name = ResidentHub;
 			packageProductDependencies = (
 				2275400B2FF1264A00CFABFE /* FirebaseAuth */,
 				2275400D2FF1264F00CFABFE /* FirebaseFirestore */,
 				2275400F2FF1265600CFABFE /* FirebaseStorage */,
 			);
 			productName = MembershipSystem;
-			productReference = 22753FF12FF10C8200CFABFE /* MembershipSystem.app */;
+			productReference = 22753FF12FF10C8200CFABFE /* ResidentHub.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -105,7 +105,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 22753FEC2FF10C8200CFABFE /* Build configuration list for PBXProject "MembershipSystem" */;
+			buildConfigurationList = 22753FEC2FF10C8200CFABFE /* Build configuration list for PBXProject "ResidentHub" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -122,7 +122,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				22753FF02FF10C8200CFABFE /* MembershipSystem */,
+				22753FF02FF10C8200CFABFE /* ResidentHub */,
 			);
 		};
 /* End PBXProject section */
@@ -336,7 +336,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		22753FEC2FF10C8200CFABFE /* Build configuration list for PBXProject "MembershipSystem" */ = {
+		22753FEC2FF10C8200CFABFE /* Build configuration list for PBXProject "ResidentHub" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				22753FFA2FF10C8200CFABFE /* Debug */,
@@ -345,7 +345,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		22753FFC2FF10C8200CFABFE /* Build configuration list for PBXNativeTarget "MembershipSystem" */ = {
+		22753FFC2FF10C8200CFABFE /* Build configuration list for PBXNativeTarget "ResidentHub" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				22753FFD2FF10C8200CFABFE /* Debug */,

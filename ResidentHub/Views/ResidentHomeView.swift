@@ -31,15 +31,24 @@ struct ResidentHomeView: View {
                                 .clipShape(Circle())
                         } else if let avatarURL = viewModel.currentUser?.avatarURL, !avatarURL.isEmpty {
                             // AsyncImage
-                            AsyncImage(url: URL(string: viewModel.currentUser?.avatarURL ?? "")) { image in
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                            } placeholder: {
-                                ProgressView()
+                            AsyncImage(url: URL(string: avatarURL)) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                case .success(let image):
+                                    image.resizable().scaledToFill()
+                                case .failure(let error):
+                                    Image(systemName: "exclamationmark.triangle")
+                                        .onAppear { print("大頭貼載入失敗：", error.localizedDescription) }
+                                @unknown default:
+                                    EmptyView()
+                                }
                             }
                             .frame(width: 80, height: 80)
                             .clipShape(Circle())
+                            .onAppear {
+                                    print("大頭貼網址：", avatarURL)    // ← 加在這裡
+                                }
                         } else {
                             // 預設灰色圖示
                             Image(systemName: "person.circle.fill")

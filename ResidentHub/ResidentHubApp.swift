@@ -1,6 +1,6 @@
 //
-//  MembershipSystemApp.swift
-//  MembershipSystem
+//  ResidentHubApp.swift
+//  ResidentHub
 //
 //  Created by 張閔瑞 on 2026/6/28.
 //
@@ -19,7 +19,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 }
 
 @main
-struct MembershipSystemApp: App {
+struct ResidentHubApp: App {
     // register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
