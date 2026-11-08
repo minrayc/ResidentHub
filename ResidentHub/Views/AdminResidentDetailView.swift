@@ -22,12 +22,18 @@ struct AdminResidentDetailView: View {
                         // 大頭貼（AsyncImage 或預設圖片）
                         if let avatarURL = user.avatarURL, !avatarURL.isEmpty {
                             // AsyncImage
-                            AsyncImage(url: URL(string: user.avatarURL ?? "")) { image in
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                            } placeholder: {
-                                ProgressView()
+                            AsyncImage(url: URL(string: avatarURL)) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                case .success(let image):
+                                    image.resizable().scaledToFill()
+                                case .failure(let error):
+                                    Image(systemName: "exclamationmark.triangle")
+                                        .onAppear { print("大頭貼載入失敗：", error.localizedDescription) }
+                                @unknown default:
+                                    EmptyView()
+                                }
                             }
                             .frame(width: 80, height: 80)
                             .clipShape(Circle())
