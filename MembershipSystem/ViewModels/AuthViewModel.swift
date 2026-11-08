@@ -18,6 +18,7 @@ class AuthViewModel: ObservableObject {
     @Published var currentUser: User?
     @Published var successMessage: String = ""
     @Published var allUsers: [User] = []
+    @Published var messages: [Message] = []
     
     func login(userEmail: String, password: String) async {
         do {
@@ -60,7 +61,12 @@ class AuthViewModel: ObservableObject {
     }
     
     func logout() {
-        
+        do {
+            try Auth.auth().signOut()
+            currentUser = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
     
     func verifyMail(userEmail: String) async {
@@ -167,4 +173,38 @@ class AuthViewModel: ObservableObject {
             errorMessage = error.localizedDescription
         }
     }
+    
+    func listenToMessages(uid: String) {
+        print("目前登入的 UID：", Auth.auth().currentUser?.uid ?? "沒有登入")
+        let db = Firestore.firestore()
+        db.collection("users").document(uid).collection("messages")
+            .order(by: "createdAt")
+            .addSnapshotListener { snapshot, error in
+                // 每次有新訊息，這裡就會被觸發
+                if let error = error {
+                        print("讀取訊息失敗：", error.localizedDescription)
+                        return
+                }
+                self.messages = snapshot?.documents.compactMap { document in
+                    try? document.data(as: Message.self)
+                } ?? []
+                
+            }
+    }
+    
+    func sendMessage(message: String, to uid: String) {
+        let db = Firestore.firestore()
+        let message = Message(
+            poster: currentUser?.id ?? "",
+            content: message,
+            createdAt: Date()
+        )
+        do {
+            try db.collection("users").document(uid).collection("messages").addDocument(from: message)
+        } catch {
+            
+        }
+    }
+    
+    
 }

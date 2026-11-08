@@ -76,3 +76,8 @@ struct LoginView: View {
         .padding(50)
     }
 }
+
+//#Preview {
+//    LoginView()
+//        .environmentObject(AuthViewModel())
+//}
