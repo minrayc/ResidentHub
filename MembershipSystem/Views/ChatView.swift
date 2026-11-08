@@ -59,5 +59,8 @@ struct ChatView: View {
         .onAppear {
             viewModel.listenToMessages(uid: residentID)
         }
+        .onDisappear {
+            viewModel.stopListeningToMessages()
+        }
     }
 }

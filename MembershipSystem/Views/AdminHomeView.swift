@@ -5,28 +5,25 @@ struct AdminHomeView: View {
     @State private var searchText = ""
     
     var body: some View {
-        VStack {
-            List {
-                ForEach(filteredUsers) { user in
-                    NavigationLink {
-                        AdminResidentDetailView(user: user)
-                    } label: {
-                        HStack {
-                            Text(user.unit)
-                            Text(user.name)
-                        }
+        List {
+            ForEach(filteredUsers) { user in
+                NavigationLink {
+                    AdminResidentDetailView(user: user)
+                } label: {
+                    HStack {
+                        Text(user.unit)
+                        Text(user.name)
                     }
                 }
             }
         }
-        .padding()
         .navigationTitle("住戶名單")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $searchText, placement: .navigationBarDrawer)
-        .onAppear {
-            Task {
-                await viewModel.fetchUser()
-            }
+        .searchable(text: $searchText,
+                    placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: "搜尋戶號或姓名")
+        .task {
+            await viewModel.fetchUser()
         }
         .toolbar {
             // 左上：登出（編輯中不顯示）
@@ -36,9 +33,9 @@ struct AdminHomeView: View {
                     viewModel.logout()
                 } label: {
                     HStack(spacing: 4) {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                            Text("登出")
-                        }
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                        Text("登出")
+                    }
                 }
                 .tint(.red)
                 

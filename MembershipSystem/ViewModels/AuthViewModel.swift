@@ -19,6 +19,7 @@ class AuthViewModel: ObservableObject {
     @Published var successMessage: String = ""
     @Published var allUsers: [User] = []
     @Published var messages: [Message] = []
+    private var messagesListener: ListenerRegistration?
     
     func login(userEmail: String, password: String) async {
         do {
@@ -60,7 +61,14 @@ class AuthViewModel: ObservableObject {
         
     }
     
+    func stopListeningToMessages() {
+        messagesListener?.remove()
+        messagesListener = nil
+        messages = []
+    }
+    
     func logout() {
+        stopListeningToMessages()
         do {
             try Auth.auth().signOut()
             currentUser = nil
@@ -196,20 +204,20 @@ class AuthViewModel: ObservableObject {
     }
     
     func listenToMessages(uid: String) {
-        print("目前登入的 UID：", Auth.auth().currentUser?.uid ?? "沒有登入")
+        messagesListener?.remove()      // ① 先關掉上一個監聽
+        messages = []                   // ② 清空，避免畫面短暫出現上一位住戶的訊息
+
         let db = Firestore.firestore()
-        db.collection("users").document(uid).collection("messages")
+        messagesListener = db.collection("users").document(uid).collection("messages")
             .order(by: "createdAt")
-            .addSnapshotListener { snapshot, error in
-                // 每次有新訊息，這裡就會被觸發
+            .addSnapshotListener { [weak self] snapshot, error in
                 if let error = error {
-                        print("讀取訊息失敗：", error.localizedDescription)
-                        return
+                    print("讀取訊息失敗：", error.localizedDescription)
+                    return
                 }
-                self.messages = snapshot?.documents.compactMap { document in
+                self?.messages = snapshot?.documents.compactMap { document in
                     try? document.data(as: Message.self)
                 } ?? []
-                
             }
     }
     
