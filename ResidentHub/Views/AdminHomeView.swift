@@ -3,8 +3,10 @@ import SwiftUI
 struct AdminHomeView: View {
     @EnvironmentObject private var viewModel: AuthViewModel
     @State private var searchText = ""
+    @State private var showLogoutAlert = false
     
     var body: some View {
+        
         List {
             ForEach(filteredUsers) { user in
                 NavigationLink {
@@ -17,7 +19,7 @@ struct AdminHomeView: View {
                 }
             }
         }
-        .navigationTitle("住戶名單")
+//        .navigationTitle("住戶名單")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $searchText,
                     placement: .navigationBarDrawer(displayMode: .always),
@@ -26,6 +28,11 @@ struct AdminHomeView: View {
             await viewModel.fetchUser()
         }
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                    Text("住戶名單")
+                        .font(.largeTitle)
+                        .bold()
+                }
             // 左上：登出（編輯中不顯示）
             ToolbarItem(placement: .navigationBarLeading) {
                 

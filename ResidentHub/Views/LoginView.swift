@@ -74,6 +74,14 @@ struct LoginView: View {
             
         }
         .padding(50)
+        .alert("通知", isPresented: Binding(
+            get: { !viewModel.successMessage.isEmpty },
+            set: { if !$0 { viewModel.successMessage = "" } }
+        )) {
+            Button("確認") { }
+        } message: {
+            Text(viewModel.successMessage)
+        }
     }
 }
 

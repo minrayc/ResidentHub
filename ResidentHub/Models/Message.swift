@@ -11,6 +11,7 @@ struct Message: Codable, Identifiable {
     @DocumentID var id: String?
     
     let poster: String
+    var posterLabel: String?
     let content: String
     let createdAt: Date
 }

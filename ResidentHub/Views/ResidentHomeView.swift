@@ -11,7 +11,10 @@ struct ResidentHomeView: View {
     @State var selectedItem: PhotosPickerItem?
     @State var imageData: Data?
     @State var message = ""
-    //    @State var previewImage: UIImage?
+    @State private var showDeleteAlert = false
+    @State private var deletePassword = ""
+    @State private var showLogoutAlert = false
+    
     var body: some View {
         VStack(spacing: 20) {
             Text("會員資料")
@@ -47,8 +50,8 @@ struct ResidentHomeView: View {
                             .frame(width: 80, height: 80)
                             .clipShape(Circle())
                             .onAppear {
-                                    print("大頭貼網址：", avatarURL)    // ← 加在這裡
-                                }
+                                print("大頭貼網址：", avatarURL)    // ← 加在這裡
+                            }
                         } else {
                             // 預設灰色圖示
                             Image(systemName: "person.circle.fill")
@@ -100,10 +103,24 @@ struct ResidentHomeView: View {
                 
             }
             
-            
+            if isEditing {
+                Button(role: .destructive) {
+                    showDeleteAlert = true
+                } label: {
+                    Text("刪除帳號")
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.red, lineWidth: 1)
+                        )
+                }
+            }
             //對話匡
             ChatView(residentID: viewModel.currentUser?.id ?? "")
-        
+                .disabled(isEditing)
+                .opacity(isEditing ? 0.4 : 1)
+            
         }
         .onAppear() {
             self.unit = self.viewModel.currentUser?.unit ?? ""
@@ -129,27 +146,47 @@ struct ResidentHomeView: View {
                     isEditing.toggle()
                 } label: {
                     HStack(spacing: 4) {
-                            Image(systemName: isEditing ? "checkmark" : "pencil")
-                            Text(isEditing ? "儲存" : "編輯")
-                        }
+                        Image(systemName: isEditing ? "checkmark" : "pencil")
+                        Text(isEditing ? "儲存" : "編輯")
+                    }
                 }
                 .tint(isEditing ? .red : .blue)
             }
-
+            
             // 左上：登出（編輯中不顯示）
             ToolbarItem(placement: .navigationBarLeading) {
                 if !isEditing {
                     Button {
-                        viewModel.logout()
+                        showLogoutAlert = true
                     } label: {
                         HStack(spacing: 4) {
-                                Image(systemName: "rectangle.portrait.and.arrow.right")
-                                Text("登出")
-                            }
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                            Text("登出")
+                        }
                     }
                     .tint(.red)
                 }
             }
+        }
+        .alert("登出帳號", isPresented: $showLogoutAlert) {
+            Button("取消", role: .cancel) { }
+            Button("確認登出", role: .destructive) {
+                viewModel.logout()
+            }
+        }
+        .alert("刪除帳號", isPresented: $showDeleteAlert) {
+            SecureField("請輸入密碼", text: $deletePassword)
+            Button("刪除", role: .destructive) {
+                Task {
+                    await viewModel.deleteAccount(password: deletePassword)
+                    deletePassword = ""
+                }
+            }
+            Button("取消", role: .cancel) {
+                deletePassword = ""
+            }
+        } message: {
+            Text("你的個人資料、大頭貼和所有訊息都會永久刪除，無法復原。")
         }
     }
 }

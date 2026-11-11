@@ -19,7 +19,23 @@ class AuthViewModel: ObservableObject {
     @Published var successMessage: String = ""
     @Published var allUsers: [User] = []
     @Published var messages: [Message] = []
+    @Published var toastMessage: String = ""
     private var messagesListener: ListenerRegistration?
+    
+    private func authErrorMessage(_ error: Error) -> String {
+        let code = AuthErrorCode(rawValue: (error as NSError).code)
+        switch code {
+        case .wrongPassword, .userNotFound, .invalidCredential, .invalidEmail:
+            return "帳號或密碼錯誤"
+        case .networkError:
+            return "網路連線異常，請稍後再試"
+        case .tooManyRequests:
+            return "嘗試次數過多，請稍後再試"
+        default:
+            return "發生錯誤，請稍後再試"
+        }
+    }
+    
     
     func login(userEmail: String, password: String) async {
         do {
@@ -35,15 +51,15 @@ class AuthViewModel: ObservableObject {
             }
             
         } catch {
-            errorMessage = error.localizedDescription
+            let nsError = error as NSError
+            print("錯誤 domain：", nsError.domain, "code：", nsError.code)
+            errorMessage = authErrorMessage(error)
         }
     }
     
-    func register(userEmail: String, userAccount: String , password: String, confirmPassword: String) async {
-        // TODO: 呼叫 Firebase 註冊
+    func register(userEmail: String, userAccount: String, password: String, confirmPassword: String) async -> Bool {
         do {
             let result = try await Auth.auth().createUser(withEmail: userEmail, password: password)
-            // 註冊成功，result.user.uid 就是新用戶的 uid
             try await result.user.sendEmailVerification()
             let db = Firestore.firestore()
             try await db.collection("users").document(result.user.uid).setData([
@@ -54,11 +70,13 @@ class AuthViewModel: ObservableObject {
                 "avatarURL": "",
                 "isAdmin": false
             ])
-            successMessage = "註冊成功！請至信箱點擊驗證連結"
+            try Auth.auth().signOut()      // 註冊會自動登入，要主動登出
+            successMessage = "確認信已寄送到 \(userEmail)，確認後即可進行登入"
+            return true
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = authErrorMessage(error)
+            return false
         }
-        
     }
     
     func stopListeningToMessages() {
@@ -72,17 +90,62 @@ class AuthViewModel: ObservableObject {
         do {
             try Auth.auth().signOut()
             currentUser = nil
+            isLogin = false
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = authErrorMessage(error)
         }
     }
+    
+    func deleteAccount(password: String) async {
+        guard let user = Auth.auth().currentUser,
+              let email = user.email else { return }
+        let uid = user.uid
+        let db = Firestore.firestore()
+
+        isLoading = true
+        defer { isLoading = false }      // 不管成功或失敗，離開函式時都會執行
+
+        do {
+            // ① 重新驗證密碼
+            let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+            try await user.reauthenticate(with: credential)
+
+            // 先停止監聽，避免刪除過程中 listener 報權限錯誤
+            stopListeningToMessages()
+
+            // ② 刪除 messages 子集合的所有訊息
+            let snapshot = try await db.collection("users").document(uid)
+                .collection("messages").getDocuments()
+            let batch = db.batch()
+            for document in snapshot.documents {
+                batch.deleteDocument(document.reference)
+            }
+            try await batch.commit()
+
+            // ③ 刪除大頭貼（沒上傳過大頭貼會回傳「找不到檔案」，用 try? 忽略）
+            try? await Storage.storage().reference().child("avatars/\(uid).jpg").delete()
+
+            // ④ 刪除使用者文件
+            try await db.collection("users").document(uid).delete()
+
+            // ⑤ 最後才刪除 Auth 帳號
+            try await user.delete()
+
+            currentUser = nil
+            isLogin = false
+            toastMessage = "帳號已刪除"
+        } catch {
+            errorMessage = authErrorMessage(error)
+        }
+    }
+    
     
     func verifyMail(userEmail: String) async {
         do {
             try await Auth.auth().sendPasswordReset(withEmail: userEmail)
             successMessage = "重置密碼信件已發送，請至信箱查詢"
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = authErrorMessage(error)
         }
     }
     
@@ -148,7 +211,7 @@ class AuthViewModel: ObservableObject {
             currentUser?.phone = phone
             currentUser?.email = email
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = authErrorMessage(error)
         }
     }
     
@@ -187,7 +250,7 @@ class AuthViewModel: ObservableObject {
                 "avatarURL": url.absoluteString
             ])
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = authErrorMessage(error)
         }
     }
     
@@ -199,7 +262,7 @@ class AuthViewModel: ObservableObject {
                 try? document.data(as: User.self)
             }.filter { !$0.isAdmin }
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = authErrorMessage(error)
         }
     }
     
@@ -222,16 +285,21 @@ class AuthViewModel: ObservableObject {
     }
     
     func sendMessage(message: String, to uid: String) {
-        let db = Firestore.firestore()
-        let message = Message(
-            poster: currentUser?.id ?? "",
+        guard let user = currentUser, let posterID = user.id else { return }
+        let label = user.isAdmin ? user.unit : "住戶 \(user.unit)"
+
+        let newMessage = Message(
+            poster: posterID,
+            posterLabel: label,
             content: message,
             createdAt: Date()
         )
         do {
-            try db.collection("users").document(uid).collection("messages").addDocument(from: message)
+            try Firestore.firestore()
+                .collection("users").document(uid)
+                .collection("messages").addDocument(from: newMessage)
         } catch {
-            
+            print("傳送訊息失敗：", error.localizedDescription)
         }
     }
     

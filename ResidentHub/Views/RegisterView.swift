@@ -53,7 +53,10 @@ struct RegisterView: View {
             
             Button(action: {
                 Task {
-                    await viewModel.register(userEmail: email, userAccount: userName, password: password, confirmPassword: confirmPassword)
+                    let success = await viewModel.register(userEmail: email, userAccount: userName, password: password, confirmPassword: confirmPassword)
+                    if success {
+                            dismiss()      // 回到上一頁（登入頁）
+                        }
                 }
             }) {
                 Text("註冊")
@@ -66,9 +69,7 @@ struct RegisterView: View {
             .buttonStyle(PlainButtonStyle())
             .disabled(!viewModel.errorMessage.isEmpty || email.isEmpty || userName.isEmpty || password.isEmpty || confirmPassword.isEmpty)
             
-            Button("返回登入頁") {
-                dismiss()
-            }
+            
             Spacer()
         }
         .padding(50)
