@@ -6,13 +6,13 @@
 
 
 <p align="center">
-  <img src="Screenshots/01.png" width="240">
-  <img src="Screenshots/02.png" width="240">
-  <img src="Screenshots/03.png" width="240">
-  <img src="Screenshots/04.png" width="240">
-  <img src="Screenshots/05.png" width="240">
-  <img src="Screenshots/06.png" width="240">
-  <img src="Screenshots/07.png" width="240">
+  <img src="Screenshots/ResidentHub-screenshot-1.jpg" width="240">
+  <img src="Screenshots/ResidentHub-screenshot-2.jpg" width="240">
+  <img src="Screenshots/ResidentHub-screenshot-3.jpg" width="240">
+  <img src="Screenshots/ResidentHub-screenshot-4.jpg" width="240">
+  <img src="Screenshots/ResidentHub-screenshot-5.jpg" width="240">
+  <img src="Screenshots/ResidentHub-screenshot-6.jpg" width="240">
+  <img src="Screenshots/ResidentHub-screenshot-7.jpg" width="240">
 </p>
 
 
